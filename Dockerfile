@@ -55,10 +55,10 @@ RUN cd /usr/local \
     && pip3 install -r requirements/all.txt
 
 ### install pymodbus for pluggit plugin according to https://github.com/bashwork/pymodbus
-RUN cd /usr/local \
-    && git clone git://github.com/bashwork/pymodbus.git -b python3 --single-branch \
-    && cd pymodbus \
-    && python3 setup.py install
+# RUN cd /usr/local \
+#     && git clone git://github.com/bashwork/pymodbus.git -b python3 --single-branch \
+#     && cd pymodbus \
+#     && python3 setup.py install
 
 ### telnet port for CLI plugin, websocket to smartVISU, webserver of smarthomeNG backend plugin
 EXPOSE 2323 2424 8383
