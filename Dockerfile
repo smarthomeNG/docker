@@ -43,4 +43,4 @@ EXPOSE 2323 2424 2788
 
 
 
-# Start with docker -d -p 2424:2424 -p 2323:2323 -p 2788:2788 -v /path/to/your/smarthome.py_folder:/usr/local/smarthome.py henfri/smarthome-ng
+# Start with docker -d -p 2424:2424 -p 2323:2323 -p 2788:2788 -v /path/to/your/smarthome.py_folder:/usr/local/smarthome.py smarthome-ng
