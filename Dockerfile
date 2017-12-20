@@ -48,7 +48,7 @@ RUN apt-get install -y \
     && usermod -aG www-data smarthome
 
 RUN cd /usr/local \
-    && git clone --recursive git://github.com/smarthomeNG/smarthome.git -b v1.3_Hotfix_2 --single-branch \
+    && git clone --recursive git://github.com/smarthomeNG/smarthome.git -b v1.4 --single-branch \
     && mkdir -p /usr/local/smarthome/var/run/ \
     && chown -R smarthome:smarthome /usr/local/smarthome \
     && cd /usr/local/smarthome/ \
