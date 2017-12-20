@@ -4,9 +4,9 @@
 FROM debian:jessie
 LABEL maintainer "Hendrik Friedel"
 LABEL maintainer "Henning Behrend"
-LABEL smarthome-ng-version "v1.3"
+LABEL smarthome-ng-version "v1.4"
 LABEL smarthome-ng-git-branch "master"
-LABEL smarthome-ng-git-tag "v1.3 Hotfix 2"
+LABEL smarthome-ng-git-tag "v1.4"
 LABEL description "first docker image that runs as user smarthome and not as root"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -68,6 +68,7 @@ EXPOSE 2323 2424 8383
 USER smarthome
 
 COPY ./entrypoint.sh /
+
 ENTRYPOINT ["/entrypoint.sh"]
 ### start SmartHomeNG in silent mode, not verbose
 CMD ["--start"]
