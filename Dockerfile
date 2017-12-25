@@ -4,9 +4,9 @@
 FROM debian:jessie
 LABEL maintainer "Hendrik Friedel"
 LABEL maintainer "Henning Behrend"
-LABEL smarthome-ng-version "v1.4"
+LABEL smarthome-ng-version "v1.4.1"
 LABEL smarthome-ng-git-branch "master"
-LABEL smarthome-ng-git-tag "v1.4"
+LABEL smarthome-ng-git-tag "v1.4.1"
 LABEL description "first docker image that runs as user smarthome and not as root"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -35,20 +35,17 @@ RUN apt-get install -y \
     unzip \
     && easy_install3 pip \
     && pip3 install \
-    cherrypy \
     colorama \
-    ephem \
-    influxdb \
-    jinja2 \
-    pyserial \
-    python-forecastio \
-    pyyaml \
-    ruamel.yaml \
-    && adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
-    && usermod -aG www-data smarthome
+    influxdb
+
+RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
+    && usermod -aG www-data smarthome \
+    && usermod -aG dialout smarthome
 
 RUN cd /usr/local \
-    && git clone --recursive git://github.com/smarthomeNG/smarthome.git -b v1.4 --single-branch \
+    && git clone --recursive git://github.com/smarthomeNG/smarthome.git -b v1.4.1 --single-branch \
+    && cd /usr/local/smarthome/plugins \
+    && git checkout v1.4.1 \
     && mkdir -p /usr/local/smarthome/var/run/ \
     && chown -R smarthome:smarthome /usr/local/smarthome \
     && cd /usr/local/smarthome/ \
