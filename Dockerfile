@@ -4,9 +4,9 @@
 FROM debian:jessie
 LABEL maintainer "Hendrik Friedel"
 LABEL maintainer "Henning Behrend"
-LABEL smarthome-ng-version "v1.4.1"
+LABEL smarthome-ng-version "v1.4.2"
 LABEL smarthome-ng-git-branch "master"
-LABEL smarthome-ng-git-tag "v1.4.1"
+LABEL smarthome-ng-git-tag "v1.4.2"
 LABEL description "first docker image that runs as user smarthome and not as root"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -43,9 +43,9 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
     && usermod -aG dialout smarthome
 
 RUN cd /usr/local \
-    && git clone --recursive git://github.com/smarthomeNG/smarthome.git -b v1.4.1 --single-branch \
+    && git clone --recursive git://github.com/smarthomeNG/smarthome.git -b v1.4.2 --single-branch \
     && cd /usr/local/smarthome/plugins \
-    && git checkout v1.4.1 \
+    && git checkout v1.4.2 \
     && mkdir -p /usr/local/smarthome/var/run/ \
     && chown -R smarthome:smarthome /usr/local/smarthome \
     && cd /usr/local/smarthome/ \
