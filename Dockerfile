@@ -36,7 +36,8 @@ RUN apt-get install -y \
     && easy_install3 pip \
     && pip3 install \
     colorama \
-    influxdb
+    influxdb \
+    paho-mqtt
 
 RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
     && usermod -aG www-data smarthome \
