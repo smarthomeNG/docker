@@ -43,6 +43,7 @@ RUN apt-get install -y libudev-dev
 
 RUN python3 -m pip install --upgrade pip
 
+
 RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
     && usermod -aG www-data smarthome \
     && usermod -aG dialout smarthome
