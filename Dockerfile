@@ -4,10 +4,10 @@
 FROM debian:jessie
 LABEL maintainer "Hendrik Friedel"
 LABEL maintainer "Henning Behrend"
-LABEL smarthome-ng-version "v1.4.2"
+LABEL smarthome-ng-version "v1.5.1"
 LABEL smarthome-ng-git-branch "master"
-LABEL smarthome-ng-git-tag "v1.4.2"
-LABEL description "first docker image that runs as user smarthome and not as root"
+LABEL smarthome-ng-git-tag "v1.5.1"
+LABEL description "smarthome-ng docker image"
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -36,7 +36,12 @@ RUN apt-get install -y \
     && easy_install3 pip \
     && pip3 install \
     colorama \
-    influxdb
+    influxdb \
+    paho-mqtt 
+
+RUN apt-get install -y libudev-dev 
+
+RUN python3 -m pip install --upgrade pip
 
 RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
     && usermod -aG www-data smarthome \
@@ -45,11 +50,17 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
 RUN mkdir /usr/local/smarthome \
     && cd /usr/local/smarthome \
     && git clone --recursive git://github.com/smarthomeNG/smarthome.git . \
-    && git checkout tags/v1.4.2 \
+    && git checkout tags/v1.5.1 \
     && mkdir -p /usr/local/smarthome/var/run/ \
+    && mkdir plugins \
+    && cd plugins \
+    && git clone git://github.com/smarthomeNG/plugins.git . \
+    && cd .. \
     && chown -R smarthome:smarthome /usr/local/smarthome \
     && cd /usr/local/smarthome/ \
+    && python3 tools/build_requirements.py \
     && pip3 install -r requirements/all.txt
+
 
 ### install pymodbus for pluggit plugin according to https://github.com/bashwork/pymodbus
 # RUN cd /usr/local \
