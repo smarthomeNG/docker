@@ -37,12 +37,11 @@ RUN apt-get install -y \
     && pip3 install \
     colorama \
     influxdb \
-    paho-mqtt 
+    paho-mqtt
 
-RUN apt-get install -y libudev-dev 
+RUN apt-get install -y libudev-dev
 
-RUN python3 -m pip install --upgrade pip
-
+RUN python3 -m pip install --upgrade pip&& pip3 install --upgrade setuptools && pip3 show setuptools
 
 RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
     && usermod -aG www-data smarthome \
@@ -56,11 +55,14 @@ RUN mkdir /usr/local/smarthome \
     && mkdir plugins \
     && cd plugins \
     && git clone git://github.com/smarthomeNG/plugins.git . \
+    && git checkout tags/v1.5.1 \
     && cd .. \
     && chown -R smarthome:smarthome /usr/local/smarthome \
     && cd /usr/local/smarthome/ \
     && python3 tools/build_requirements.py \
-    && pip3 install -r requirements/all.txt
+    && pip3 install -r requirements/all.txt \
+    && pip3 install pyusb pymysql \
+    && pip3 install pyblnet
 
 
 ### install pymodbus for pluggit plugin according to https://github.com/bashwork/pymodbus
