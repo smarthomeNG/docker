@@ -1,12 +1,12 @@
 #
 # SmartHomeNG
 #
-FROM debian:jessie
+FROM debian:stretch-20190326
 LABEL maintainer "Hendrik Friedel"
 LABEL maintainer "Henning Behrend"
-LABEL smarthome-ng-version "v1.5.1"
+LABEL smarthome-ng-version "v1.6.0"
 LABEL smarthome-ng-git-branch "master"
-LABEL smarthome-ng-git-tag "v1.5.1"
+LABEL smarthome-ng-git-tag "v1.6.0"
 LABEL description "smarthome-ng docker image"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -26,6 +26,8 @@ ENV LANG=de_DE.UTF-8
 
 RUN apt-get install -y \
     build-essential \
+    libtool \
+    autoconf \
     dialog \
     git \
     openntpd \
@@ -33,11 +35,17 @@ RUN apt-get install -y \
     python3-dev \
     python3-setuptools \
     unzip \
+    libudev-dev \
+    libcurl4-openssl-dev libssl-dev \
     && easy_install3 pip \
     && pip3 install \
     colorama \
     influxdb \
-    paho-mqtt
+    paho-mqtt \
+    pyusb \
+    pycurl \
+    pyblnet
+
 
 RUN apt-get install -y libudev-dev
 
@@ -50,12 +58,12 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
 RUN mkdir /usr/local/smarthome \
     && cd /usr/local/smarthome \
     && git clone --recursive git://github.com/smarthomeNG/smarthome.git . \
-    && git checkout tags/v1.5.1 \
+    && git checkout tags/v1.6 \
     && mkdir -p /usr/local/smarthome/var/run/ \
     && mkdir plugins \
     && cd plugins \
     && git clone git://github.com/smarthomeNG/plugins.git . \
-    && git checkout tags/v1.5.1 \
+    && git checkout tags/v1.6 \
     && cd .. \
     && chown -R smarthome:smarthome /usr/local/smarthome \
     && cd /usr/local/smarthome/ \
@@ -63,6 +71,7 @@ RUN mkdir /usr/local/smarthome \
     && pip3 install -r requirements/all.txt \
     && pip3 install pyusb pymysql \
     && pip3 install pyblnet
+
 
 
 ### install pymodbus for pluggit plugin according to https://github.com/bashwork/pymodbus
