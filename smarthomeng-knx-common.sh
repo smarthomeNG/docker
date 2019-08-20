@@ -2,7 +2,7 @@ ACTION=$1
 
 DOCKER_REPOSITORY_ID=smarthomeng
 DOCKER_REPOSITORY=smarthome-ng
-VERSION=1.4.2
+VERSION=1.6
 
 IMAGE=$DOCKER_REPOSITORY_ID/$DOCKER_REPOSITORY:$VERSION
 IMAGE_LATEST_TAG=$DOCKER_REPOSITORY_ID/$DOCKER_REPOSITORY:latest
@@ -43,7 +43,6 @@ _run() {
     -v $smarthomengconfig/logics:/usr/local/smarthome/logics \
     -v $smarthomengconfig/scenes:/usr/local/smarthome/scenes \
     -v $smarthomengconfig/var:/usr/local/smarthome/var \
-    # -v $smarthomengconfig/plugins/sonos:/usr/local/smarthome/plugins/sonos \
     # -v /dev/ttyUSB0:/dev/ttyUSB0 \
     --name=$CONTAINER_NAME \
     -it $IMAGE
