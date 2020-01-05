@@ -40,6 +40,8 @@ RUN apt-get install -y \
     python3-pip \
     python3-setuptools \
     unzip \
+    libcurl4-openssl-dev \
+    libssl-dev \
     && pip3 install \
     colorama \
     influxdb
@@ -49,12 +51,12 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
     && usermod -aG dialout smarthome
 
 RUN mkdir -p /usr/local/smarthome \
-    && mkdir -p /usr/local/smarthome/plugins \
-    && mkdir -p /usr/local/smarthome/var/run \
     && cd /usr/local/smarthome \
-    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.6 --single-branch \
+    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.6 --single-branch  \
     && git checkout -b tags/v1.6 \
-    && cd /usr/local/smarthome/plugins \
+    && mkdir -p /usr/local/smarthome/plugins \
+    && mkdir -p /usr/local/smarthome/var/run
+RUN cd /usr/local/smarthome/plugins \
     && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.6.1 --single-branch \
     && git checkout -b tags/v1.6.1 \
     && chown -R smarthome:smarthome /usr/local/smarthome \
@@ -72,6 +74,9 @@ RUN pip3 install python-dateutil>=2.5.3
 RUN pip3 install scipy==1.2.0
 RUN pip3 install tinytag>=0.18.0
 RUN pip3 install xmltodict>=0.11.0
+RUN pip3 install pycurl
+RUN pip3 install python-miio
+RUN pip3 install PyBLNET
 
 ### telnet port for CLI plugin, websocket to smartVISU, webserver of smarthomeNG backend plugin
 EXPOSE 2323 2424 8383
