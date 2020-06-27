@@ -49,29 +49,23 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
     && usermod -aG dialout smarthome
 
 #move here, so that the part of the Image does not need to be rebuilt just because of a change of the version
-LABEL SmartHomeNG-core-version "v1.7.1"
-LABEL SmartHomeNG-plugins-version "v1.7.1"
+LABEL SmartHomeNG-core-version "v1.7.2"
+LABEL SmartHomeNG-plugins-version "v1.7.2"
 
 
 RUN mkdir -p /usr/local/smarthome \
     && cd /usr/local/smarthome \
-    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.7.1 --single-branch  \
-    && git checkout -b tags/v1.7.1 \
+    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.7.2 --single-branch  \
+    && git checkout -b tags/v1.7.2 \
     && mkdir -p /usr/local/smarthome/plugins \
     && mkdir -p /usr/local/smarthome/var/run
 RUN cd /usr/local/smarthome/plugins \
-    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.7.1 --single-branch \
-    && git checkout -b tags/v1.7.1 \
+    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.7.2 --single-branch \
+    && git checkout -b tags/v1.7.2 \
     && chown -R smarthome:smarthome /usr/local/smarthome
 
-#RUN apt-get install -y librrd-dev libpython3-dev
-#RUN pip3 install arrow<=0.13
-#RUN pip3 install cherrypy<=17.4
-#RUN pip3 install pyatv<=3
-
-RUN cd /usr/local/smarthome/ && pip3 install -r requirements/base.txt
-
 # SmartHomeNG plugins
+RUN pip3 install cherrypy>=8.1.2
 RUN pip3 install netifaces
 RUN pip3 install numpy
 RUN pip3 install paho-mqtt>=1.2.2
@@ -83,8 +77,16 @@ RUN pip3 install scipy==1.2.0
 RUN pip3 install tinytag>=0.18.0
 RUN pip3 install xmltodict>=0.11.0
 RUN pip3 install pycurl
-RUN pip3 install python-miio==0.5.0.1
+RUN pip3 install python-miio
 RUN pip3 install PyBLNET
+RUN pip3 install pymysql
+RUN pip3 install ephem>=3.7
+RUN pip3 install holidays>=0.9.11
+RUN pip3 install jinja2>=2.9
+RUN pip3 install paho-mqtt>=1.2.2
+RUN pip3 install psutil
+RUN pip3 install requests>=2.20.0
+RUN pip3 install ruamel.yaml==0.15.74
 
 ### telnet port for CLI plugin, websocket to smartVISU, webserver of smarthomeNG backend plugin
 EXPOSE 2323 2424 8383
