@@ -77,7 +77,7 @@ RUN pip3 install scipy==1.2.0
 RUN pip3 install tinytag>=0.18.0
 RUN pip3 install xmltodict>=0.11.0
 RUN pip3 install pycurl
-RUN pip3 install python-miio
+RUN pip3 install python-miio==0.5.0.1
 RUN pip3 install PyBLNET
 RUN pip3 install pymysql
 RUN pip3 install ephem>=3.7
