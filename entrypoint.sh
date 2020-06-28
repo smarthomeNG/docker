@@ -3,7 +3,8 @@
 ARGS=$@
 
 # start SmartHomeNG
-python3 /usr/local/smarthome/bin/smarthome.py "$ARGS"
+cd /usr/local/smarthome/
+python3 bin/smarthome.py "$ARGS"
 
 # workaround because SmartHomeNG default forks to background
 while :; do
