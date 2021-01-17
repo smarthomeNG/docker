@@ -49,19 +49,19 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
     && usermod -aG dialout smarthome
 
 #move here, so that the part of the Image does not need to be rebuilt just because of a change of the version
-LABEL SmartHomeNG-core-version "v1.7.2"
-LABEL SmartHomeNG-plugins-version "v1.7.2"
+LABEL SmartHomeNG-core-version "v1.8.0"
+LABEL SmartHomeNG-plugins-version "v1.8.0"
 
 
 RUN mkdir -p /usr/local/smarthome \
     && cd /usr/local/smarthome \
-    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.7.2 --single-branch  \
-    && git checkout -b tags/v1.7.2 \
+    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.8 --single-branch  \
+    && git checkout -b tags/v1.8 \
     && mkdir -p /usr/local/smarthome/plugins \
     && mkdir -p /usr/local/smarthome/var/run
 RUN cd /usr/local/smarthome/plugins \
-    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.7.2 --single-branch \
-    && git checkout -b tags/v1.7.2 \
+    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.8 --single-branch \
+    && git checkout -b tags/v1.8 \
     && chown -R smarthome:smarthome /usr/local/smarthome
 
 # SmartHomeNG plugins
