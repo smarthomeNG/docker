@@ -49,19 +49,19 @@ RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPho
     && usermod -aG dialout smarthome
 
 #move here, so that the part of the Image does not need to be rebuilt just because of a change of the version
-LABEL SmartHomeNG-core-version "v1.8.1"
-LABEL SmartHomeNG-plugins-version "v1.8.1"
+LABEL SmartHomeNG-core-version "v1.8.2"
+LABEL SmartHomeNG-plugins-version "v1.8.2"
 
 
 RUN mkdir -p /usr/local/smarthome \
     && cd /usr/local/smarthome \
-    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.8.1 --single-branch  \
-    && git checkout -b tags/v1.8.1 \
+    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.8.2 --single-branch  \
+    && git checkout -b tags/v1.8.2 \
     && mkdir -p /usr/local/smarthome/plugins \
     && mkdir -p /usr/local/smarthome/var/run
 RUN cd /usr/local/smarthome/plugins \
-    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.8.1 --single-branch \
-    && git checkout -b tags/v1.8 \
+    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.8.2 --single-branch \
+    && git checkout -b tags/v1.8.2 \
     && chown -R smarthome:smarthome /usr/local/smarthome
 
 # SmartHomeNG plugins
@@ -87,6 +87,9 @@ RUN pip3 install paho-mqtt>=1.2.2
 RUN pip3 install psutil
 RUN pip3 install requests>=2.20.0
 RUN pip3 install ruamel.yaml==0.15.74
+RUN pip3 install pyotp portalocker iowait
+
+
 
 ### telnet port for CLI plugin, websocket to smartVISU, webserver of smarthomeNG backend plugin
 EXPOSE 2323 2424 8383
