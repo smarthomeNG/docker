@@ -40,9 +40,7 @@ RUN apt-get install -y \
     unzip \
     libcurl4-openssl-dev \
     libssl-dev \
-    && pip3 install \
-    colorama \
-    influxdb
+    libffi-dev
 
 RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
     && usermod -aG www-data smarthome \
@@ -64,30 +62,39 @@ RUN cd /usr/local/smarthome/plugins \
     && git checkout -b tags/v1.8.2 \
     && chown -R smarthome:smarthome /usr/local/smarthome
 
+RUN pip3 install --upgrade pip
+#RUN pip3 install "pip>=20"
+
+
 # SmartHomeNG plugins
-RUN pip3 install cherrypy>=8.1.2
-RUN pip3 install netifaces
-RUN pip3 install numpy
-RUN pip3 install paho-mqtt>=1.2.2
-RUN pip3 install pyatv==0.3.9
-RUN pip3 install pyjwt>=1.6.4
-RUN pip3 install pymodbus==2.2.0
-RUN pip3 install python-dateutil>=2.5.3
-RUN pip3 install scipy==1.2.0
-RUN pip3 install tinytag>=0.18.0
-RUN pip3 install xmltodict>=0.11.0
-RUN pip3 install pycurl
-RUN pip3 install python-miio==0.5.0.1
-RUN pip3 install PyBLNET
-RUN pip3 install pymysql
-RUN pip3 install ephem>=3.7
-RUN pip3 install holidays>=0.9.11
-RUN pip3 install jinja2>=2.9
-RUN pip3 install paho-mqtt>=1.2.2
-RUN pip3 install psutil
-RUN pip3 install requests>=2.20.0
-RUN pip3 install ruamel.yaml==0.15.74
-RUN pip3 install pyotp portalocker iowait
+RUN pip3 install cheroot==8.4.1 \
+janus                       \
+websockets                  \
+colorama influxdb           \
+cherrypy>=8.1.2             \
+netifaces                   \
+numpy                       \
+python-telegram-bot         \
+pyatv==0.3.9                \
+pyjwt>=1.6.4                \
+pymodbus==2.2.0             \
+python-dateutil>=2.5.3      \
+scipy==1.2.0                \
+tinytag>=0.18.0             \
+xmltodict>=0.11.0           \
+pycurl                      \
+python-miio==0.5.0.1        \
+PyBLNET                     \
+pymysql                     \
+ephem>=3.7                  \
+holidays>=0.9.11            \
+jinja2>=2.9                 \
+psutil                      \
+requests>=2.20.0            \
+ruamel.yaml==0.15.74        \
+pyotp portalocker iowait    \
+RUN pip3 install pyworxcloud
+
 
 
 
