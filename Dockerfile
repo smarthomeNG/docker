@@ -31,7 +31,7 @@ RUN set -eux; \
   rm -rf deprecated tests dev tools/* doc tox.ini setup.py; \
   find . -name "*.md" -print -exec rm -rf {} +; \
 # remove plugins if they are not running - for example GPIO is RasPi specific
-  for i in "$PLGN_DEL"; do rm -rf plugins/$i; done
+  [ "$PLGN_DEL" ] && for i in "$PLGN_DEL"; do rm -rf plugins/$i; done
 
 ### Build Stage 11 - determine requirements for smarthomNG #######################
 FROM stage1 As stage2
@@ -39,8 +39,9 @@ FROM stage1 As stage2
 ARG PLGN_CONFLICT="appletv hue2"
 
 WORKDIR /usr/local/smarthome
+RUN set -eux; \
 # remove some plugins to remove there requirements
-RUN set -eux; for i in "$PLGN_CONFLICT"; do rm -rf plugins/$i; done; \
+  [ "$PLGN_CONFLICT" ] && for i in "$PLGN_CONFLICT"; do rm -rf plugins/$i; done; \
 # necessary to run smarthome.py
   python -m pip install --no-cache-dir ruamel.yaml; \
 # create requirement files
