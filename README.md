@@ -72,8 +72,4 @@ Don't forget to adjust the driver settings in SmartVISU.
 
 - [SmarthomeNG](https://www.smarthomeng.de/) ([Support Forum](https://knx-user-forum.de/forum/supportforen/smarthome-py)), [SmartVISU](https://www.smartvisu.de/) ([Support Forum](https://knx-user-forum.de/forum/supportforen/smartvisu))
 - [python@DockerHUB](https://hub.docker.com/_/python), [PHP@DockerHUB](https://hub.docker.com/_/php)
-<<<<<<< HEAD
 - Where to get help: [Support Thread](https://knx-user-forum.de/forum/supportforen/smarthome-py/974370-smarthomeng-smartvisu-installation-ratzfatz-via-docker)
-=======
-- Where to get help: [Support Thread](https://knx-user-forum.de/forum/supportforen/smarthome-py/974370-smarthomeng-smartvisu-installation-ratzfatz-via-docker)
->>>>>>> b855af57fd726cb9bf969f716eefe4662bac47dd
