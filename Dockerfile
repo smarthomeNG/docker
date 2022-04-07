@@ -31,7 +31,9 @@ RUN set -eux; \
   rm -rf deprecated tests dev tools/* doc tox.ini setup.py; \
   find . -name "*.md" -print -exec rm -rf {} +; \
 # remove plugins if they are not running - for example GPIO is RasPi specific
-  [ "$PLGN_DEL" ] && for i in "$PLGN_DEL"; do rm -rf plugins/$i; done
+  if [ "$PLGN_DEL" ]; then \
+    for i in $PLGN_DEL; do rm -rf plugins/$i; done; \
+  fi
 
 ### Build Stage 11 - determine requirements for smarthomNG #######################
 FROM stage1 As stage2
@@ -41,19 +43,22 @@ ARG PLGN_CONFLICT="appletv hue2"
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
 # remove some plugins to remove there requirements
-  [ "$PLGN_CONFLICT" ] && for i in "$PLGN_CONFLICT"; do rm -rf plugins/$i; done; \
+  if [ "$PLGN_CONFLICT" ]; then \
+    for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
+  fi; \
 # necessary to run smarthome.py
   python -m pip install --no-cache-dir ruamel.yaml; \
 # create requirement files
-  python3 bin/smarthome.py
+  python3 bin/smarthome.py --stop
 
-### Build Stage 20 - build requirements for smarthomNG ###########################
+### Build Stage 3 - build requirements for smarthomNG ###########################
 FROM python-base As stage3
 
 COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
 
 # install/update/build requirements
-RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
+RUN set -eux; \
+  apt-get update; apt-get install -y --no-install-recommends \
     #pyjq
     automake \
     #pyjq, openzwave
@@ -68,6 +73,10 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
     libudev-dev \
     openzwave; \
   rm -rf /var/lib/apt/lists/*; \
+# fix python requirements
+  echo "holidays<0.13" >>/requirements.txt; \
+  #sed -e 's/^\(holidays.*\)/\1,<=0.12;python_version==3.8/g' lib/requirements.txt; \
+# install python requirements
   python -m pip install --no-cache-dir -r requirements.txt
 
 ### Final Stage ##################################################################
@@ -112,6 +121,8 @@ RUN set -eux; \
     touch $PATH_DATA/$i/.not_mounted; \
   done; \
   chmod go+rw $PATH_DATA/log; \
+  # fix for wrong log path
+  ln -vs $PATH_DATA/log $PATH_SHNG/log; \
 # prepare smartvisu
   mkdir -p $PATH_HTML /var/www; \
   ln -vsf $PATH_HTML /var/www/html; \
@@ -123,6 +134,7 @@ RUN set -eux; \
 EXPOSE 2323 2424 8383
 
 # and finalize
-COPY ./entrypoint.sh ./shng_wrapper.sh /
+#COPY ./entrypoint.sh ./shng_wrapper.sh /
+COPY * /
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["--foreground"]
