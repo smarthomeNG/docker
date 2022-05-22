@@ -1,111 +1,140 @@
-#
-# SmartHomeNG
-#
+### dockerfile for smarthomNG flavor "full"
 
-FROM debian:buster-20190812
+### select python base image ####################################################
+FROM python:3.8-slim As python-base
 
-LABEL maintainer "Hendrik Friedel"
-LABEL maintainer "Henning Behrend"
-LABEL description "SmartHomeNG docker image"
+### Build Stage 1 - clone smarthome NG from Git #################################
+FROM python-base As stage1
 
-ENV DEBIAN_FRONTEND noninteractive
+# install git
+RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
+    ca-certificates git; \
+  rm -rf /var/lib/apt/lists/*
 
-### Change Language
-RUN apt-get update -qq \
-    && apt-get install -y locales apt-utils ; \
-    echo "Europe/Berlin" > /etc/timezone \
-    && dpkg-reconfigure -f noninteractive tzdata \
-    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
-    && sed -i -e 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen \
-    && echo 'LANG="de_DE.UTF-8"'>/etc/default/locale \
-    && dpkg-reconfigure --frontend=noninteractive locales \
-    && update-locale LANG=de_DE.UTF-8
+# prepare clone
+ARG SHNG_VER_CORE="v1.9.1" \
+    SHNG_VER_PLGN="v1.9.1" \
+    PLGN_DEL="gpio"
 
-ENV LANG=de_DE.UTF-8
+# clone smarthomeNG from Git
+WORKDIR /usr/local/smarthome
+RUN set -eux; \
+# clone SmarthomeNG
+  git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_CORE \
+    https://github.com/smarthomeNG/smarthome.git .; \
+  git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_PLGN \
+    https://github.com/smarthomeNG/plugins.git plugins; \
+# remove git files - not usefull inside a container
+  find . -name ".git*" -print -exec rm -rf {} +; \
+  find . -name ".*" -type f -print -exec rm -rf {} +; \
+# remove unneccessary files - no need for doc, dev and so on inside a container
+  rm -rf deprecated tests dev tools/* doc tox.ini setup.py; \
+  find . -name "*.md" -print -exec rm -rf {} +; \
+# remove plugins if they are not running - for example GPIO is RasPi specific
+  if [ "$PLGN_DEL" ]; then \
+    for i in $PLGN_DEL; do rm -rf plugins/$i; done; \
+  fi
 
-RUN apt-get install -y \
-    autoconf \
+### Build Stage 11 - determine requirements for smarthomNG #######################
+FROM stage1 As stage2
+
+ARG PLGN_CONFLICT="appletv hue2"
+
+WORKDIR /usr/local/smarthome
+RUN set -eux; \
+# remove some plugins to remove there requirements
+  if [ "$PLGN_CONFLICT" ]; then \
+    for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
+  fi; \
+# necessary to run smarthome.py
+  python -m pip install --no-cache-dir ruamel.yaml; \
+# create requirement files
+  python3 bin/smarthome.py --stop
+
+### Build Stage 3 - build requirements for smarthomNG ###########################
+FROM python-base As stage3
+
+COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
+
+# install/update/build requirements
+RUN set -eux; \
+  apt-get update; apt-get install -y --no-install-recommends \
+    #pyjq
     automake \
+    #pyjq, openzwave
     build-essential \
-    dialog \
-    git \
-    libudev-dev \
+    #bluepy
+    libglib2.0-dev \
+    #rrd
+    librrd-dev \
+    #pyjq
     libtool \
-    openntpd \
+    #openzwave
+    libudev-dev \
+    openzwave; \
+  rm -rf /var/lib/apt/lists/*; \
+# fix python requirements
+  echo "holidays<0.13" >>/requirements.txt; \
+  #sed -e 's/^\(holidays.*\)/\1,<=0.12;python_version==3.8/g' lib/requirements.txt; \
+# install python requirements
+  python -m pip install --no-cache-dir -r requirements.txt
+
+### Final Stage ##################################################################
+FROM python-base
+
+# copy files into place
+COPY --from=stage1 /usr/local/smarthome /usr/local/smarthome
+COPY --from=stage3 /usr/local/lib /usr/local/lib
+
+RUN set -eux; \
+# add user smarthome:smarthome respectively 1000:1000
+  adduser --disabled-password --gecos "" smarthome; \
+# install needed tools
+  apt-get update; apt-get install -y --no-install-recommends \
+    gosu \
+    openzwave \
     procps \
-    python3 \
-    python3-dev \
-    python3-pip \
-    python3-setuptools \
-    unzip \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libffi-dev
+    unzip; \
+  rm -rf /var/lib/apt/lists/*; \
+  #python -m pip install --no-cache-dir --upgrade pip; \
+# prepare volumes
+  PATH_SHNG="/usr/local/smarthome"; \
+  PATH_CONF="/mnt/conf"; \
+  PATH_DATA="/mnt/data"; \
+  PATH_HTML="/mnt/html"; \
+  DIRS_CONF="etc items logics scenes functions"; \
+  DIRS_DATA="backup restore cache db log"; \
+  chmod go+rws $PATH_SHNG/requirements; \
+# prepare conf
+  mkdir -p $PATH_CONF; \
+  for i in $DIRS_CONF; do \
+    cp -vlr $PATH_SHNG/$i $PATH_CONF; \
+    touch $PATH_CONF/$i/.not_mounted; \
+  done; \
+  chmod go+rw $PATH_CONF/etc; \
+# prepare data
+  mkdir -p $PATH_SHNG/var/run; \
+  chmod go+rw $PATH_SHNG/var/run; \
+  for i in $DIRS_DATA; do \
+    mkdir -p $PATH_DATA/$i; \
+    ln -vs $PATH_DATA/$i $PATH_SHNG/var/$i; \
+    touch $PATH_DATA/$i/.not_mounted; \
+  done; \
+  chmod go+rw $PATH_DATA/log; \
+  # fix for wrong log path
+  ln -vs $PATH_DATA/log $PATH_SHNG/log; \
+# prepare smartvisu
+  mkdir -p $PATH_HTML /var/www; \
+  ln -vsf $PATH_HTML /var/www/html; \
+# prepare legacy
+  chmod go+rw $PATH_SHNG/etc; \
+  touch $PATH_SHNG/etc/.not_mounted
 
-RUN adduser smarthome --disabled-password --gecos "First Last,RoomNumber,WorkPhone,HomePhone" \
-    && usermod -aG www-data smarthome \
-    && usermod -aG dialout smarthome
-
-#move here, so that the part of the Image does not need to be rebuilt just because of a change of the version
-LABEL SmartHomeNG-core-version "v1.8.2"
-LABEL SmartHomeNG-plugins-version "v1.8.2"
-
-
-RUN mkdir -p /usr/local/smarthome \
-    && cd /usr/local/smarthome \
-    && git clone git://github.com/smarthomeNG/smarthome.git . --branch v1.8.2 --single-branch  \
-    && git checkout -b tags/v1.8.2 \
-    && mkdir -p /usr/local/smarthome/plugins \
-    && mkdir -p /usr/local/smarthome/var/run
-RUN cd /usr/local/smarthome/plugins \
-    && git clone git://github.com/smarthomeNG/plugins.git . --branch v1.8.2 --single-branch \
-    && git checkout -b tags/v1.8.2 \
-    && chown -R smarthome:smarthome /usr/local/smarthome
-
-RUN pip3 install --upgrade pip
-#RUN pip3 install "pip>=20"
-
-
-# SmartHomeNG plugins
-RUN pip3 install cheroot==8.4.1 \
-janus                       \
-websockets                  \
-colorama influxdb           \
-cherrypy>=8.1.2             \
-netifaces                   \
-numpy                       \
-python-telegram-bot         \
-pyatv==0.3.9                \
-pyjwt>=1.6.4                \
-pymodbus==2.2.0             \
-python-dateutil>=2.5.3      \
-scipy==1.2.0                \
-tinytag>=0.18.0             \
-xmltodict>=0.11.0           \
-pycurl                      \
-python-miio==0.5.0.1        \
-PyBLNET                     \
-pymysql                     \
-ephem>=3.7                  \
-holidays>=0.9.11            \
-jinja2>=2.9                 \
-psutil                      \
-requests>=2.20.0            \
-ruamel.yaml==0.15.74        \
-pyotp portalocker iowait    \
-RUN pip3 install pyworxcloud
-
-
-
-
-### telnet port for CLI plugin, websocket to smartVISU, webserver of smarthomeNG backend plugin
+# expose ports for cli, websocket, admin interface
 EXPOSE 2323 2424 8383
 
-### run container as user "smarthome" and not as "root",
-### comment this if you really know what you are doing and you need to be 'root'
-USER smarthome
-
-COPY ./entrypoint.sh /
+# and finalize
+#COPY ./entrypoint.sh ./shng_wrapper.sh /
+COPY * /
 ENTRYPOINT ["/entrypoint.sh"]
-### start SmartHomeNG in silent mode, not verbose
-CMD ["--start"]
+CMD ["--foreground"]
