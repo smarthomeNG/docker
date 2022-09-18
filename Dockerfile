@@ -35,7 +35,7 @@ RUN set -eux; \
     for i in $PLGN_DEL; do rm -rf plugins/$i; done; \
   fi
 
-### Build Stage 11 - determine requirements for smarthomNG #######################
+### Build Stage 11 - determine requirements for smarthomeNG #######################
 FROM stage1 As stage2
 
 ARG PLGN_CONFLICT="appletv hue2"
@@ -51,7 +51,7 @@ RUN set -eux; \
 # create requirement files
   python3 bin/smarthome.py --stop
 
-### Build Stage 3 - build requirements for smarthomNG ###########################
+### Build Stage 3 - build requirements for smarthomeNG ###########################
 FROM python-base As stage3
 
 COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
