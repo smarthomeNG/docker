@@ -5,6 +5,9 @@ SHNG_ARG=$@
 PATH_SHNG=/usr/local/smarthome
 PATH_CONF=/mnt/conf
 PATH_DATA=/mnt/data
+PATH_PLGN_USER=/mnt/plugins
+PATH_PLGN_TRGT=/usr/local/smarthome/plugins
+PATH_PLGN_DFLT=/usr/local/smarthome/plugins-default
 PATH_HTML=/mnt/html
 DIRS_CONF="etc items logics scenes functions"
 DIRS_DATA="backup restore cache db log"
@@ -124,6 +127,33 @@ if [ "$USER_SHNG" ]; then
     find $PATH_HTML -name '*.ini' -exec chmod g+rw {} +
     find $PATH_HTML -name '*.var' -exec chmod g+rw {} +
   fi
+fi
+
+#merge plugins appropriately
+cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
+
+if [ -d $PATH_PLGN_USER ]; then
+  if [ -f $PATH_PLGN_USER/download_plugins.sh ]; then
+    $PATH_PLGN_USER/download_plugins.sh || download_plugins_result=$?
+  fi
+  shopt -s extglob nullglob
+  # take all plugin-folders in the custom folder
+  PLUGINS_FROM_CUSTOM=( "$PATH_PLGN_USER"/*/ )
+  # remove leading basedir
+  PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]#"$PATH_PLGN_USER/"}" )
+  # remove trailing slash
+  PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]%/}" )
+
+  for i in "${!PLUGINS_FROM_CUSTOM[@]}"; do
+    if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]} ]; then
+      _print INFO Overwriting Plugin ${PLUGINS_FROM_CUSTOM[i]}
+      rm -rf $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}
+    else
+      _print INFO Copying Plugin ${PLUGINS_FROM_CUSTOM[i]}
+    fi
+    cp -vr "$PATH_PLGN_USER/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/"
+    touch $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/.from_custom
+  done
 fi
 
 # start SmartHomeNG

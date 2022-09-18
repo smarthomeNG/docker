@@ -25,7 +25,7 @@ RUN set -eux; \
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_CORE \
     $SHNG_REPO_CORE .; \
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_PLGN \
-    $SHNG_REPO_PLGN plugins; \
+    $SHNG_REPO_PLGN plugins-default; \
 # remove git files - not usefull inside a container
   find . -name ".git*" -print -exec rm -rf {} +; \
   find . -name ".*" -type f -print -exec rm -rf {} +; \
@@ -34,7 +34,7 @@ RUN set -eux; \
   find . -name "*.md" -print -exec rm -rf {} +; \
 # remove plugins if they are not running - for example GPIO is RasPi specific
   if [ "$PLGN_DEL" ]; then \
-    for i in $PLGN_DEL; do rm -rf plugins/$i; done; \
+    for i in $PLGN_DEL; do rm -rf plugins-default/$i; done; \
   fi
 
 ### Build Stage 11 - determine requirements for smarthomeNG #######################
@@ -44,12 +44,14 @@ ARG PLGN_CONFLICT="appletv hue2"
 
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
-# remove some plugins to remove there requirements
+# remove some plugins to remove their requirements
   if [ "$PLGN_CONFLICT" ]; then \
-    for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
+    for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
   fi; \
 # necessary to run smarthome.py
   python -m pip install --no-cache-dir ruamel.yaml; \
+# create links from the default plugins-folder to the to be used one.
+  cp -alr plugins-default plugins; \
 # create requirement files
   python3 bin/smarthome.py --stop
 
