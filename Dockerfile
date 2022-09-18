@@ -12,18 +12,20 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
-ARG SHNG_VER_CORE="v1.9.1" \
-    SHNG_VER_PLGN="v1.9.1" \
-    PLGN_DEL="gpio"
+ARG SHNG_VER_CORE="v1.9.2" \
+    SHNG_VER_PLGN="v1.9.2" \
+    SHNG_REPO_CORE="https://github.com/smarthomeNG/smarthome.git" \
+    SHNG_REPO_PLGN="https://github.com/smarthomeNG/plugins.git" \
+    PLGN_DEL="gpio zwave"
 
 # clone smarthomeNG from Git
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
 # clone SmarthomeNG
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_CORE \
-    https://github.com/smarthomeNG/smarthome.git .; \
+    $SHNG_REPO_CORE .; \
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_PLGN \
-    https://github.com/smarthomeNG/plugins.git plugins; \
+    $SHNG_REPO_PLGN plugins; \
 # remove git files - not usefull inside a container
   find . -name ".git*" -print -exec rm -rf {} +; \
   find . -name ".*" -type f -print -exec rm -rf {} +; \
