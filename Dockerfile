@@ -12,18 +12,20 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
-ARG SHNG_VER_CORE="v1.9.1" \
-    SHNG_VER_PLGN="v1.9.1" \
-    PLGN_DEL="gpio"
+ARG SHNG_VER_CORE="v1.9.2" \
+    SHNG_VER_PLGN="v1.9.2" \
+    SHNG_REPO_CORE="https://github.com/smarthomeNG/smarthome.git" \
+    SHNG_REPO_PLGN="https://github.com/smarthomeNG/plugins.git" \
+    PLGN_DEL="gpio zwave"
 
 # clone smarthomeNG from Git
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
 # clone SmarthomeNG
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_CORE \
-    https://github.com/smarthomeNG/smarthome.git .; \
+    $SHNG_REPO_CORE .; \
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_PLGN \
-    https://github.com/smarthomeNG/plugins.git plugins; \
+    $SHNG_REPO_PLGN plugins-default; \
 # remove git files - not usefull inside a container
   find . -name ".git*" -print -exec rm -rf {} +; \
   find . -name ".*" -type f -print -exec rm -rf {} +; \
@@ -32,26 +34,28 @@ RUN set -eux; \
   find . -name "*.md" -print -exec rm -rf {} +; \
 # remove plugins if they are not running - for example GPIO is RasPi specific
   if [ "$PLGN_DEL" ]; then \
-    for i in $PLGN_DEL; do rm -rf plugins/$i; done; \
+    for i in $PLGN_DEL; do rm -rf plugins-default/$i; done; \
   fi
 
-### Build Stage 11 - determine requirements for smarthomNG #######################
+### Build Stage 11 - determine requirements for smarthomeNG #######################
 FROM stage1 As stage2
 
 ARG PLGN_CONFLICT="appletv hue2"
 
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
-# remove some plugins to remove there requirements
+# remove some plugins to remove their requirements
   if [ "$PLGN_CONFLICT" ]; then \
-    for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
+    for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
   fi; \
 # necessary to run smarthome.py
   python -m pip install --no-cache-dir ruamel.yaml; \
+# create links from the default plugins-folder to the to be used one.
+  cp -alr plugins-default plugins; \
 # create requirement files
   python3 bin/smarthome.py --stop
 
-### Build Stage 3 - build requirements for smarthomNG ###########################
+### Build Stage 3 - build requirements for smarthomeNG ###########################
 FROM python-base As stage3
 
 COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
@@ -75,7 +79,8 @@ RUN set -eux; \
   rm -rf /var/lib/apt/lists/*; \
 # fix python requirements
   echo "holidays<0.13" >>/requirements.txt; \
-  #sed -e 's/^\(holidays.*\)/\1,<=0.12;python_version==3.8/g' lib/requirements.txt; \
+# Add pymysql
+  echo "pymysql" >>/requirements.txt; \
 # install python requirements
   python -m pip install --no-cache-dir -r requirements.txt
 
