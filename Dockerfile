@@ -139,7 +139,7 @@ RUN set -eux; \
 EXPOSE 2323 2424 8383
 
 # and finalize
-#COPY ./entrypoint.sh ./shng_wrapper.sh /
-COPY * /
+COPY ./entrypoint.sh ./shng_wrapper.sh /
+RUN chmod +x ./entrypoint.sh; chmod +x ./shng_wrapper.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["--foreground"]
