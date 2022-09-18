@@ -79,7 +79,8 @@ RUN set -eux; \
   rm -rf /var/lib/apt/lists/*; \
 # fix python requirements
   echo "holidays<0.13" >>/requirements.txt; \
-  #sed -e 's/^\(holidays.*\)/\1,<=0.12;python_version==3.8/g' lib/requirements.txt; \
+# Add pymysql
+  echo "pymysql" >>/requirements.txt; \
 # install python requirements
   python -m pip install --no-cache-dir -r requirements.txt
 
