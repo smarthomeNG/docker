@@ -16,7 +16,7 @@ ARG SHNG_VER_CORE="v1.9.2" \
     SHNG_VER_PLGN="v1.9.2" \
     SHNG_REPO_CORE="https://github.com/smarthomeNG/smarthome.git" \
     SHNG_REPO_PLGN="https://github.com/smarthomeNG/plugins.git" \
-    PLGN_DEL="gpio zwave"
+    PLGN_DEL="gpio"
 
 # clone smarthomeNG from Git
 WORKDIR /usr/local/smarthome
