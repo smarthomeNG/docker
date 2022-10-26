@@ -130,7 +130,23 @@ if [ "$USER_SHNG" ]; then
 fi
 
 #merge plugins appropriately
-cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
+if [ -d $PATH_PLGN_TRGT ]; then
+  # if Plugin folder is already there specific plugins were mounted from outside
+  shopt -s extglob nullglob
+  # take all plugin-folders in the custom folder
+  PLUGINS_FROM_DEFAULT=( "$PATH_PLGN_DFLT"/*/ )
+  # remove leading basedir
+  PLUGINS_FROM_DEFAULT=( "${PLUGINS_FROM_DEFAULT[@]#"$PATH_PLGN_DFLT/"}" )
+  # remove trailing slash
+  PLUGINS_FROM_DEFAULT=( "${PLUGINS_FROM_DEFAULT[@]%/}" )
+  for i in "${!PLUGINS_FROM_DEFAULT[@]}"; do
+    if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]} ]; then
+      _print INFO Plugin already mounted here ${PLUGINS_FROM_DEFAULT[i]}
+    else
+      cp -alr "$PATH_PLGN_DFLT/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}"
+else
+  cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
+fi
 
 if [ -d $PATH_PLGN_USER ]; then
   if [ -f $PATH_PLGN_USER/download_plugins.sh ]; then
