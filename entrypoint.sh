@@ -144,6 +144,8 @@ if [ -d $PATH_PLGN_TRGT ]; then
       _print INFO Plugin already mounted here ${PLUGINS_FROM_DEFAULT[i]}
     else
       cp -alr "$PATH_PLGN_DFLT/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}"
+    fi
+  done
 else
   cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
 fi
