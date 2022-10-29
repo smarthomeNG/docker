@@ -140,12 +140,14 @@ if [ -d $PATH_PLGN_TRGT ]; then
   # remove trailing slash
   PLUGINS_FROM_DEFAULT=( "${PLUGINS_FROM_DEFAULT[@]%/}" )
   for i in "${!PLUGINS_FROM_DEFAULT[@]}"; do
-    if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]} ]; then
+    if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_DEFAULT[i]} ]; then
       _print INFO Plugin already mounted here ${PLUGINS_FROM_DEFAULT[i]}
     else
-      cp -alr "$PATH_PLGN_DFLT/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}"
+      cp -alr "$PATH_PLGN_DFLT/${PLUGINS_FROM_DEFAULT[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_DEFAULT[i]}"
     fi
   done
+  # copy root files as well
+  cp -al $PATH_PLGN_DFLT/* $PATH_PLGN_TRGT/
 else
   cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
 fi
