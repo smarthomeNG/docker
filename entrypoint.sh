@@ -147,7 +147,7 @@ if [ -d $PATH_PLGN_TRGT ]; then
     fi
   done
   # copy root files as well
-  if [ ! -f $PATH_PLGN_DFLT/__init__.py ]; then
+  if [ ! -f $PATH_PLGN_TRGT/__init__.py ]; then
     _print INFO __init__.py did not exist in plugin-folder, so it is now put there
     cp $PATH_PLGN_DFLT/__init__.py $PATH_PLGN_TRGT/
   fi
