@@ -131,7 +131,7 @@ fi
 
 #merge plugins appropriately
 if [ -d $PATH_PLGN_TRGT ]; then
-  # if Plugin folder is already there specific plugins were mounted from outside
+  # if Plugin folder is already there, specific plugins were mounted from outside
   shopt -s extglob nullglob
   # take all plugin-folders in the custom folder
   PLUGINS_FROM_DEFAULT=( "$PATH_PLGN_DFLT"/*/ )
@@ -152,31 +152,31 @@ if [ -d $PATH_PLGN_TRGT ]; then
     cp $PATH_PLGN_DFLT/__init__.py $PATH_PLGN_TRGT/
   fi
 else
+  # if plugin-folder is not yet available, build new one and merge plugins
   cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
-fi
-
-if [ -d $PATH_PLGN_USER ]; then
-  if [ -f $PATH_PLGN_USER/download_plugins.sh ]; then
-    $PATH_PLGN_USER/download_plugins.sh || download_plugins_result=$?
-  fi
-  shopt -s extglob nullglob
-  # take all plugin-folders in the custom folder
-  PLUGINS_FROM_CUSTOM=( "$PATH_PLGN_USER"/*/ )
-  # remove leading basedir
-  PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]#"$PATH_PLGN_USER/"}" )
-  # remove trailing slash
-  PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]%/}" )
-
-  for i in "${!PLUGINS_FROM_CUSTOM[@]}"; do
-    if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]} ]; then
-      _print INFO Overwriting Plugin ${PLUGINS_FROM_CUSTOM[i]}
-      rm -rf $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}
-    else
-      _print INFO Copying Plugin ${PLUGINS_FROM_CUSTOM[i]}
+  if [ -d $PATH_PLGN_USER ]; then
+    if [ -f $PATH_PLGN_USER/download_plugins.sh ]; then
+      $PATH_PLGN_USER/download_plugins.sh || download_plugins_result=$?
     fi
-    cp -vr "$PATH_PLGN_USER/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/"
-    touch $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/.from_custom
-  done
+    shopt -s extglob nullglob
+    # take all plugin-folders in the custom folder
+    PLUGINS_FROM_CUSTOM=( "$PATH_PLGN_USER"/*/ )
+    # remove leading basedir
+    PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]#"$PATH_PLGN_USER/"}" )
+    # remove trailing slash
+    PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]%/}" )
+
+    for i in "${!PLUGINS_FROM_CUSTOM[@]}"; do
+      if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]} ]; then
+        _print INFO Overwriting Plugin ${PLUGINS_FROM_CUSTOM[i]}
+        rm -rf $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}
+      else
+        _print INFO Copying Plugin ${PLUGINS_FROM_CUSTOM[i]}
+      fi
+      cp -vr "$PATH_PLGN_USER/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/"
+      touch $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/.from_custom
+    done
+  fi
 fi
 
 # start SmartHomeNG
