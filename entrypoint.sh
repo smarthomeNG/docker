@@ -119,6 +119,7 @@ if [ "$USER_SHNG" ]; then
     for i in $DIRS_DATA; do
       chown -R $USER_SHNG $PATH_DATA/$i
     done
+    chown $USER_SHNG $PATH_DATA
   fi
   if [ "$SKIP_CHOWN_HTML" != "1" ]; then
     chown -R $USER_WWW $PATH_HTML
