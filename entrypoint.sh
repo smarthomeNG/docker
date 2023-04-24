@@ -130,7 +130,7 @@ if [ "$USER_SHNG" ]; then
 fi
 
 #merge plugins appropriately
-if [ -d $PATH_PLGN_TRGT ]; then
+if [ -d $PATH_PLGN_TRGT -a ! -f $PATH_PLGN_TRGT/.was_merge_built ]; then
   # if Plugin folder is already there, specific plugins were mounted from outside
   shopt -s extglob nullglob
   # take all plugin-folders in the custom folder
@@ -177,6 +177,7 @@ else
       touch $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/.from_custom
     done
   fi
+  touch $PATH_PLGN_TRGT/.was_merge_built
 fi
 
 # start SmartHomeNG
