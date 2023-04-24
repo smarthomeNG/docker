@@ -153,6 +153,10 @@ if [ -d $PATH_PLGN_TRGT -a ! -f $PATH_PLGN_TRGT/.was_merge_built ]; then
   fi
 else
   # if plugin-folder is not yet available, build new one and merge plugins
+  # if we come here, and the folder is present already, we are re-building this whole exercise
+  if [ -d $PATH_PLGN_TRGT ]; then
+    rm -rf $PATH_PLGN_TRGT
+  fi
   cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
   if [ -d $PATH_PLGN_USER ]; then
     if [ -f $PATH_PLGN_USER/download_plugins.sh ]; then

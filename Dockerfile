@@ -12,8 +12,8 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
-ARG SHNG_VER_CORE="v1.9.3" \
-    SHNG_VER_PLGN="v1.9.3" \
+ARG SHNG_VER_CORE="v1.9.5" \
+    SHNG_VER_PLGN="v1.9.5" \
     SHNG_REPO_CORE="https://github.com/smarthomeNG/smarthome.git" \
     SHNG_REPO_PLGN="https://github.com/smarthomeNG/plugins.git" \
     PLGN_DEL="gpio zwave"
