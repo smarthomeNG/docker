@@ -119,6 +119,7 @@ RUN set -eux; \
   chmod go+rw $PATH_CONF/etc; \
 # prepare data
   mkdir -p $PATH_SHNG/var/run; \
+  chmod go+rw $PATH_SHNG/var; \
   chmod go+rw $PATH_SHNG/var/run; \
   for i in $DIRS_DATA; do \
     mkdir -p $PATH_DATA/$i; \
