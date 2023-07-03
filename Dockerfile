@@ -72,6 +72,7 @@ RUN pip3 install python-dateutil>=2.5.3
 RUN pip3 install scipy==1.2.0
 RUN pip3 install tinytag>=0.18.0
 RUN pip3 install xmltodict>=0.11.0
+RUN pip3 install forecast_solar pyotp
 
 ### telnet port for CLI plugin, websocket to smartVISU, webserver of smarthomeNG backend plugin
 EXPOSE 2323 2424 8383
