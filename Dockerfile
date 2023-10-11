@@ -8,7 +8,7 @@ FROM python-base As stage1
 
 # install git
 RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
-    ca-certificates git; \
+    ca-certificates git gcc python3-dev; \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
@@ -47,9 +47,9 @@ RUN set -eux; \
     for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
   fi; \
 # necessary to run smarthome.py
-  python -m pip install --no-cache-dir ruamel.yaml; \
+python -m pip install --no-cache-dir "ruamel.yaml<=0.16.8"; \
 # create requirement files
-  python3 bin/smarthome.py --stop
+  python3 bin/smarthome.py --stop || true
 
 ### Build Stage 3 - build requirements for smarthomNG ###########################
 FROM python-base As stage3
