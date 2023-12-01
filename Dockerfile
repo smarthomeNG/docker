@@ -1,7 +1,7 @@
 ### dockerfile for smarthomNG flavor "full"
 
 ### select python base image ####################################################
-FROM python:3.9-slim As python-base
+FROM python:3.10-slim As python-base
 
 ### Build Stage 1 - clone smarthome NG from Git #################################
 FROM python-base As stage1
@@ -52,8 +52,10 @@ RUN set -eux; \
   python -m pip install --no-cache-dir ruamel.yaml; \
 # create links from the default plugins-folder to the to be used one.
   cp -alr plugins-default plugins; \
+  echo "PIP:"; \
+  which pip3; \
 # create requirement files
-  python3 bin/smarthome.py --stop
+  python3 bin/smarthome.py --stop --pip3_command
 
 ### Build Stage 3 - build requirements for smarthomeNG ###########################
 FROM python-base As stage3
