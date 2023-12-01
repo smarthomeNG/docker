@@ -44,6 +44,8 @@ ARG PLGN_CONFLICT="appletv hue2"
 
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
+  apt-get update; apt-get install -y --no-install-recommends \
+  pyephem; \
 # remove some plugins to remove their requirements
   if [ "$PLGN_CONFLICT" ]; then \
     for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
