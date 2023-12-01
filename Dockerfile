@@ -45,7 +45,7 @@ ARG PLGN_CONFLICT="appletv hue2"
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
   apt-get update; apt-get install -y --no-install-recommends \
-  pyephem; \
+  python3-ephem; \
 # remove some plugins to remove their requirements
   if [ "$PLGN_CONFLICT" ]; then \
     for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
@@ -66,6 +66,7 @@ COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
 RUN set -eux; \
   apt-get update; apt-get install -y --no-install-recommends \
     #pyjq
+    python3-ephem \
     automake \
     #pyjq, openzwave
     build-essential \
