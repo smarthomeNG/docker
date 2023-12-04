@@ -53,7 +53,7 @@ RUN set -eux; \
 # create links from the default plugins-folder to the to be used one.
   cp -alr plugins-default plugins; \
 # create requirement files
-  export PIP_ROOT_USER_ACTION=ignore \
+  export PIP_ROOT_USER_ACTION=ignore; \
   python3 bin/smarthome.py --stop --pip3_command /usr/local/bin/pip3
 
 ### Build Stage 3 - build requirements for smarthomeNG ###########################
