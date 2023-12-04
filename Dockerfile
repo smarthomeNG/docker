@@ -1,7 +1,7 @@
 ### dockerfile for smarthomNG flavor "full"
 
 ### select python base image ####################################################
-FROM python:3.11-slim As python-base
+FROM python:3.9-slim As python-base
 
 ### Build Stage 1 - clone smarthome NG from Git #################################
 FROM python-base As stage1
@@ -44,8 +44,6 @@ ARG PLGN_CONFLICT="appletv hue2"
 
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
-  apt-get update; apt-get install -y --no-install-recommends \
-  python3-ephem; \
 # remove some plugins to remove their requirements
   if [ "$PLGN_CONFLICT" ]; then \
     for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
@@ -55,7 +53,7 @@ RUN set -eux; \
 # create links from the default plugins-folder to the to be used one.
   cp -alr plugins-default plugins; \
 # create requirement files
-  python3 bin/smarthome.py --stop --pip3_command /usr/local/bin/pip3
+  python3 bin/smarthome.py --stop --pip3_command "/usr/local/bin/pip3 --root-user-action=ignore"
 
 ### Build Stage 3 - build requirements for smarthomeNG ###########################
 FROM python-base As stage3
