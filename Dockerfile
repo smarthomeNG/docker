@@ -48,12 +48,13 @@ RUN set -eux; \
   if [ "$PLGN_CONFLICT" ]; then \
     for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
   fi; \
-# necessary to run smarthome.py
-  python -m pip install --no-cache-dir ruamel.yaml; \
 # create links from the default plugins-folder to the to be used one.
   cp -alr plugins-default plugins; \
-# create requirement files
+# necessary to run smarthome.py
   export PIP_ROOT_USER_ACTION=ignore; \
+  /usr/local/bin/pip3 install --upgrade pip; \
+  /usr/local/bin/pip3 install --no-cache-dir ruamel.yaml; \
+# create requirement files
   python3 bin/smarthome.py --stop --pip3_command /usr/local/bin/pip3
 
 ### Build Stage 3 - build requirements for smarthomeNG ###########################
