@@ -5,16 +5,23 @@
 This is a Dockerfile/image to build a container for SmarthomeNG. 
 
 ## Quick Start
-To pull from docker hub:
+### Start from scratch
+
+- You should create a folder to store the files for configuration before starting the container. This folder can stay empty at the beginning, the container will create the structure itself.
+
+#### Docker native
 ```
-docker pull henfri/smarthome-ng
+docker pull smarthomeng/smarthomeng
 ```
 Clone [smartVISU](https://github.com/Martin-Gleiss/smartvisu) to `./volume/html/smartvisu`:
 ```
 git clone https://github.com/Martin-Gleiss/smartvisu.git ./volume/html/smartvisu
 ```
+#### Synology NAS
 
-### Running
+#### Portainer
+
+#### Docker-compose / Portainer Stack
 
 Example with web server docker-compose.yaml:
 ```
@@ -55,6 +62,17 @@ services:
 >smartVISU web interface available at `http://[host]/smartvisu`
 >
 Don't forget to adjust the driver settings in SmartVISU.
+
+### But I had a container up and running with the previous image (SHNG 1.5.1 - 1.9.1)
+
+While developing a very user-friendly structure for people who start new we haven't forgotten about those who run the Docker infrastructure for years already. Therefor you can run the container like you are used to with folders that are mounted into the container image.
+
+
+#### Migrating to the new folder pattern
+
+
+
+
 
 ## Configuration Parameters
 

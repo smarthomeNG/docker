@@ -1,7 +1,7 @@
 ### dockerfile for smarthomNG flavor "full"
 
 ### select python base image ####################################################
-FROM python:3.8-slim As python-base
+FROM python:3.9-slim As python-base
 
 ### Build Stage 1 - clone smarthome NG from Git #################################
 FROM python-base As stage1
@@ -12,18 +12,20 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
-ARG SHNG_VER_CORE="v1.9.1" \
-    SHNG_VER_PLGN="v1.9.1" \
-    PLGN_DEL="gpio"
+ARG SHNG_VER_CORE="v1.9.5" \
+    SHNG_VER_PLGN="v1.9.5" \
+    SHNG_REPO_CORE="https://github.com/smarthomeNG/smarthome.git" \
+    SHNG_REPO_PLGN="https://github.com/smarthomeNG/plugins.git" \
+    PLGN_DEL="gpio zwave"
 
 # clone smarthomeNG from Git
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
 # clone SmarthomeNG
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_CORE \
-    https://github.com/smarthomeNG/smarthome.git .; \
+    $SHNG_REPO_CORE .; \
   git -c advice.detachedHead=false clone --single-branch --branch $SHNG_VER_PLGN \
-    https://github.com/smarthomeNG/plugins.git plugins; \
+    $SHNG_REPO_PLGN plugins-default; \
 # remove git files - not usefull inside a container
   find . -name ".git*" -print -exec rm -rf {} +; \
   find . -name ".*" -type f -print -exec rm -rf {} +; \
@@ -32,26 +34,30 @@ RUN set -eux; \
   find . -name "*.md" -print -exec rm -rf {} +; \
 # remove plugins if they are not running - for example GPIO is RasPi specific
   if [ "$PLGN_DEL" ]; then \
-    for i in $PLGN_DEL; do rm -rf plugins/$i; done; \
+    for i in $PLGN_DEL; do rm -rf plugins-default/$i; done; \
   fi
 
-### Build Stage 11 - determine requirements for smarthomNG #######################
+### Build Stage 11 - determine requirements for smarthomeNG #######################
 FROM stage1 As stage2
 
 ARG PLGN_CONFLICT="appletv hue2"
 
 WORKDIR /usr/local/smarthome
 RUN set -eux; \
-# remove some plugins to remove there requirements
+# remove some plugins to remove their requirements
   if [ "$PLGN_CONFLICT" ]; then \
-    for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
+    for i in $PLGN_CONFLICT; do rm -rf plugins-default/$i; done; \
   fi; \
+# create links from the default plugins-folder to the to be used one.
+  cp -alr plugins-default plugins; \
 # necessary to run smarthome.py
-  python -m pip install --no-cache-dir ruamel.yaml; \
+  export PIP_ROOT_USER_ACTION=ignore; \
+  /usr/local/bin/pip3 install --upgrade pip; \
+  /usr/local/bin/pip3 install --no-cache-dir ruamel.yaml; \
 # create requirement files
-  python3 bin/smarthome.py --stop
+  python3 bin/smarthome.py --stop --pip3_command /usr/local/bin/pip3
 
-### Build Stage 3 - build requirements for smarthomNG ###########################
+### Build Stage 3 - build requirements for smarthomeNG ###########################
 FROM python-base As stage3
 
 COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
@@ -60,6 +66,7 @@ COPY --from=stage2 /usr/local/smarthome/requirements/all.txt /requirements.txt
 RUN set -eux; \
   apt-get update; apt-get install -y --no-install-recommends \
     #pyjq
+    python3-ephem \
     automake \
     #pyjq, openzwave
     build-essential \
@@ -68,14 +75,15 @@ RUN set -eux; \
     #rrd
     librrd-dev \
     #pyjq
-    libtool \
+    libtool; \
     #openzwave
-    libudev-dev \
-    openzwave; \
+    ## libudev-dev \
+    ## openzwave; \
   rm -rf /var/lib/apt/lists/*; \
 # fix python requirements
   echo "holidays<0.13" >>/requirements.txt; \
-  #sed -e 's/^\(holidays.*\)/\1,<=0.12;python_version==3.8/g' lib/requirements.txt; \
+# Add pymysql
+  echo "pymysql" >>/requirements.txt; \
 # install python requirements
   python -m pip install --no-cache-dir -r requirements.txt
 
@@ -114,6 +122,7 @@ RUN set -eux; \
   chmod go+rw $PATH_CONF/etc; \
 # prepare data
   mkdir -p $PATH_SHNG/var/run; \
+  chmod go+rw $PATH_SHNG/var; \
   chmod go+rw $PATH_SHNG/var/run; \
   for i in $DIRS_DATA; do \
     mkdir -p $PATH_DATA/$i; \
@@ -134,7 +143,7 @@ RUN set -eux; \
 EXPOSE 2323 2424 8383
 
 # and finalize
-#COPY ./entrypoint.sh ./shng_wrapper.sh /
-COPY * /
+COPY ./entrypoint.sh ./shng_wrapper.sh /
+RUN chmod +x ./entrypoint.sh; chmod +x ./shng_wrapper.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["--foreground"]

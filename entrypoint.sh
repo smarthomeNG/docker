@@ -5,6 +5,9 @@ SHNG_ARG=$@
 PATH_SHNG=/usr/local/smarthome
 PATH_CONF=/mnt/conf
 PATH_DATA=/mnt/data
+PATH_PLGN_USER=/mnt/plugins
+PATH_PLGN_TRGT=/usr/local/smarthome/plugins
+PATH_PLGN_DFLT=/usr/local/smarthome/plugins-default
 PATH_HTML=/mnt/html
 DIRS_CONF="etc items logics scenes functions"
 DIRS_DATA="backup restore cache db log"
@@ -28,7 +31,7 @@ if [ -f $PATH_SHNG/etc/.not_mounted ]; then
       WARN_MOUNT_CONF="${WARN_MOUNT_CONF# } $i"
     elif [ ! -f $PATH_CONF/$i/.files_created ]; then
       mkdir -p $PATH_CONF/$i
-      cp -vnr $PATH_SHNG/$i/* $PATH_CONF
+      cp -vnr $PATH_SHNG/$i/* $PATH_CONF/$i
       touch $PATH_CONF/$i/.files_created
     fi
   done
@@ -116,6 +119,7 @@ if [ "$USER_SHNG" ]; then
     for i in $DIRS_DATA; do
       chown -R $USER_SHNG $PATH_DATA/$i
     done
+    chown $USER_SHNG $PATH_DATA
   fi
   if [ "$SKIP_CHOWN_HTML" != "1" ]; then
     chown -R $USER_WWW $PATH_HTML
@@ -124,6 +128,61 @@ if [ "$USER_SHNG" ]; then
     find $PATH_HTML -name '*.ini' -exec chmod g+rw {} +
     find $PATH_HTML -name '*.var' -exec chmod g+rw {} +
   fi
+fi
+
+#merge plugins appropriately
+if [ -d $PATH_PLGN_TRGT -a ! -f $PATH_PLGN_TRGT/.was_merge_built ]; then
+  # if Plugin folder is already there, specific plugins were mounted from outside
+  shopt -s extglob nullglob
+  # take all plugin-folders in the custom folder
+  PLUGINS_FROM_DEFAULT=( "$PATH_PLGN_DFLT"/*/ )
+  # remove leading basedir
+  PLUGINS_FROM_DEFAULT=( "${PLUGINS_FROM_DEFAULT[@]#"$PATH_PLGN_DFLT/"}" )
+  # remove trailing slash
+  PLUGINS_FROM_DEFAULT=( "${PLUGINS_FROM_DEFAULT[@]%/}" )
+  for i in "${!PLUGINS_FROM_DEFAULT[@]}"; do
+    if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_DEFAULT[i]} ]; then
+      _print INFO Plugin already mounted here ${PLUGINS_FROM_DEFAULT[i]}
+    else
+      cp -alr "$PATH_PLGN_DFLT/${PLUGINS_FROM_DEFAULT[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_DEFAULT[i]}"
+    fi
+  done
+  # copy root files as well
+  if [ ! -f $PATH_PLGN_TRGT/__init__.py ]; then
+    _print INFO __init__.py did not exist in plugin-folder, so it is now put there
+    cp $PATH_PLGN_DFLT/__init__.py $PATH_PLGN_TRGT/
+  fi
+else
+  # if plugin-folder is not yet available, build new one and merge plugins
+  # if we come here, and the folder is present already, we are re-building this whole exercise
+  if [ -d $PATH_PLGN_TRGT ]; then
+    rm -rf $PATH_PLGN_TRGT
+  fi
+  cp -alr $PATH_PLGN_DFLT $PATH_PLGN_TRGT
+  if [ -d $PATH_PLGN_USER ]; then
+    if [ -f $PATH_PLGN_USER/download_plugins.sh ]; then
+      $PATH_PLGN_USER/download_plugins.sh || download_plugins_result=$?
+    fi
+    shopt -s extglob nullglob
+    # take all plugin-folders in the custom folder
+    PLUGINS_FROM_CUSTOM=( "$PATH_PLGN_USER"/*/ )
+    # remove leading basedir
+    PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]#"$PATH_PLGN_USER/"}" )
+    # remove trailing slash
+    PLUGINS_FROM_CUSTOM=( "${PLUGINS_FROM_CUSTOM[@]%/}" )
+
+    for i in "${!PLUGINS_FROM_CUSTOM[@]}"; do
+      if [ -d $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]} ]; then
+        _print INFO Overwriting Plugin ${PLUGINS_FROM_CUSTOM[i]}
+        rm -rf $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}
+      else
+        _print INFO Copying Plugin ${PLUGINS_FROM_CUSTOM[i]}
+      fi
+      cp -vr "$PATH_PLGN_USER/${PLUGINS_FROM_CUSTOM[i]}" "$PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/"
+      touch $PATH_PLGN_TRGT/${PLUGINS_FROM_CUSTOM[i]}/.from_custom
+    done
+  fi
+  touch $PATH_PLGN_TRGT/.was_merge_built
 fi
 
 # start SmartHomeNG
