@@ -47,7 +47,7 @@ RUN set -eux; \
     for i in $PLGN_CONFLICT; do rm -rf plugins/$i; done; \
   fi; \
 # necessary to run smarthome.py
-  python -m pip install --no-cache-dir ruamel.yaml; \
+  python -m pip install --no-cache-dir "ruamel.yaml<=0.16.8"; \
 # create requirement files
   python3 bin/smarthome.py --stop
 
