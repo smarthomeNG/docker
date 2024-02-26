@@ -12,8 +12,8 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
-ARG SHNG_VER_CORE="v1.9.1" \
-    SHNG_VER_PLGN="v1.9.1" \
+ARG SHNG_VER_CORE="v1.10.0" \
+    SHNG_VER_PLGN="v1.10.0" \
     PLGN_DEL="gpio"
 
 # clone smarthomeNG from Git
