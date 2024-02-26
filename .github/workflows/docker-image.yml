@@ -1,0 +1,34 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag smarthomeng:latest
+    - name: Inspect Docker image
+      run: docker image inspect smarthomeng:latest  
+    - name: Run SmarthomeNG Container
+      run: |
+        mkdir tmpMnt
+        pwd
+        docker container run -v /home/runner/work/docker_smarthomeNG/docker_smarthomeNG/tmpMnt:/mnt smarthomeng:latest
+      timeout-minutes: 1
+      continue-on-error: true
+    - name: Check Log
+      run: |
+       if [ -f /home/runner/work/docker_smarthomeNG/docker_smarthomeNG/tmpMnt/data/log/smarthome-details.log ]; then
+         echo LogFound
+       else
+         exit 1
+       fi
