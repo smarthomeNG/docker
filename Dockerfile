@@ -1,7 +1,7 @@
 ### dockerfile for smarthomNG flavor "full"
 
 ### select python base image ####################################################
-FROM python:3.8-slim As python-base
+FROM python:3.10-slim As python-base
 
 ### Build Stage 1 - clone smarthome NG from Git #################################
 FROM python-base As stage1
@@ -12,8 +12,8 @@ RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
-ARG SHNG_VER_CORE="v1.9.1" \
-    SHNG_VER_PLGN="v1.9.1" \
+ARG SHNG_VER_CORE="v1.10.0" \
+    SHNG_VER_PLGN="v1.10.0" \
     PLGN_DEL="gpio"
 
 # clone smarthomeNG from Git
