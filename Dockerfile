@@ -8,7 +8,7 @@ FROM python-base As stage1
 
 # install git
 RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
-    ca-certificates git; \
+    ca-certificates git gcc; \
   rm -rf /var/lib/apt/lists/*
 
 # prepare clone
